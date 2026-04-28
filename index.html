@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#2563eb">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <title>Router Admin</title>
-
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlJvdXRlciBBZG1pbiBQV0EiLAogICJzaG9ydF9uYW1lIjogIlJvdXRlciIsCiAgInN0YXJ0X3VybCI6ICIuL2luZGV4Lmh0bWwiLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmOGZhZmMiLAogICJ0aGVtZV9jb2xvciI6ICIjMjU2M2ViIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9jZG4taWNvbnMtcG5nLmZscXRpY29uLmNvbS81MTIvOTExLzkxMTI0NC5wbmciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIKICAgIH0KICBdCn0=">
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/911/911244.png">
 
     <style>
         :root { --p: #2563eb; --bg: #f8fafc; }
@@ -16,7 +15,7 @@
         .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; width: 85%; max-width: 350px; }
         .icon { font-size: 50px; margin-bottom: 15px; }
         .btn { display: block; background: var(--p); color: white; text-decoration: none; padding: 15px; border-radius: 12px; font-weight: bold; border: none; width: 100%; cursor: pointer; font-size: 1.1rem; }
-        .status { margin-top: 20px; font-size: 0.8rem; color: #22c55e; }
+        .status { margin-top: 20px; font-size: 0.8rem; color: #64748b; }
     </style>
 </head>
 <body>
@@ -24,34 +23,25 @@
 <div class="card">
     <div class="icon">📡</div>
     <h2>Router Panel</h2>
-    <p style="color:#64748b">192.168.1.1</p>
+    <p style="color:#64748b">IP: 192.168.1.1</p>
     <button onclick="location.href='http://192.168.1.1'" class="btn">Open Admin Panel</button>
-    <div id="pwa-status" class="status">Checking PWA...</div>
+    <div id="pwa-status" class="status">Initializing...</div>
 </div>
 
 <script>
-    // Service Worker Registration
+    // সার্ভিস ওয়ার্কার রেজিস্ট্রেশন
     if ('serviceWorker' in navigator) {
-        const swCode = `
-            const CACHE_NAME = 'router-v1';
-            self.addEventListener('install', e => self.skipWaiting());
-            self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
-        `;
-        const blob = new Blob([swCode], { type: 'application/javascript' });
-        const swUrl = URL.createObjectURL(blob);
-        
-        navigator.serviceWorker.register(swUrl)
-            .then(() => document.getElementById('pwa-status').innerText = '● PWA System Active')
-            .catch(() => document.getElementById('pwa-status').innerText = 'PWA Error');
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => {
+                    console.log('SW Registered!');
+                    document.getElementById('pwa-status').innerHTML = '<span style="color:#22c55e">● System Active</span>';
+                })
+                .catch(err => {
+                    document.getElementById('pwa-status').innerHTML = '<span style="color:#ef4444">● Registration Failed</span>';
+                });
+        });
     }
-
-    // PWA Install Prompt Logic
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        document.getElementById('pwa-status').innerText = '● Ready to Install';
-    });
 </script>
 
 </body>
