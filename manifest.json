@@ -1,0 +1,17 @@
+{
+  "name": "Router Admin Panel",
+  "short_name": "Router",
+  "description": "Quick access to router admin gateway",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/911/911244.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
