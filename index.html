@@ -3,13 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Free Speedtest</title>
+    <title>Internet Speed Test</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f9; padding: 50px; }
-        .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: inline-block; }
-        button { background: #007bff; color: white; border: none; padding: 10px 20px; font-size: 18px; border-radius: 5px; cursor: pointer; }
-        button:disabled { background: #ccc; }
-        #result { margin-top: 20px; font-size: 24px; font-weight: bold; color: #333; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #f0f2f5; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+        }
+        .card { 
+            background: white; 
+            padding: 35px 25px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            text-align: center; 
+            max-width: 350px; 
+            width: 100%;
+        }
+        h2 { color: #1a1a1a; margin-bottom: 25px; font-size: 24px; font-weight: 700; }
+        button { 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            padding: 12px 30px; 
+            font-size: 18px; 
+            font-weight: 600;
+            border-radius: 12px; 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 25px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #bdc3c7; cursor: not-allowed; }
+        #result { 
+            font-size: 20px; 
+            font-weight: 600; 
+            color: #4a5568; 
+            line-height: 1.5;
+            min-height: 60px;
+        }
+        .loader {
+            color: #007bff;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -21,43 +61,40 @@
 </div>
 
 <script>
-function runSpeedTest() {
+async function runSpeedTest() {
     const resultDiv = document.getElementById('result');
     const btn = document.getElementById('start-btn');
     
     btn.disabled = true;
-    resultDiv.innerText = "Testing Download Speed...";
+    resultDiv.innerHTML = '<span class="loader">Testing Download Speed...</span>';
 
-    // ১০ মেগাবাইটের একটি ফ্রি ডামি ফাইল (CDN থেকে)
-    const imageAddr = "https://cachefly.cachefly.net/10mb.test?v=" + new Date().getTime(); 
-    const downloadSize = 10485760; // 10 MB in bytes
-
-    let startTime, endTime;
-    let download = new Image();
-
-    startTime = new Date().getTime();
-    download.src = imageAddr;
-
-    download.onload = function () {
-        endTime = new Date().getTime();
-        showResults(startTime, endTime, downloadSize);
-        btn.disabled = false;
-    }
+    // ১ মেগাবাইটের (1 MB) একটি ওপেন ও CORSমুক্ত ফাইল লিংক
+    const testUrl = "https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png?v=" + new Date().getTime(); 
     
-    download.onerror = function () {
-        resultDiv.innerText = "Error testing speed. Try again.";
+    try {
+        const startTime = performance.now();
+        const response = await fetch(testUrl, { mode: 'cors', cache: 'no-store' });
+        
+        if (!response.ok) throw new Error('Network response was not ok');
+        
+        const blob = await response.blob();
+        const endTime = performance.now();
+        
+        const fileSizeInBytes = blob.size; // ফাইলের আসল সাইজ নিবে
+        const durationInSec = (endTime - startTime) / 1000;
+        
+        // Bits-এ রূপান্তর (1 Byte = 8 Bits)
+        const bitsLoaded = fileSizeInBytes * 8;
+        const speedBps = bitsLoaded / durationInSec;
+        const speedMbps = speedBps / (1024 * 1024);
+
+        resultDiv.innerHTML = "Download Speed:<br><span style='font-size: 32px; color: #2ecc71; font-weight: 800;'>" + speedMbps.toFixed(2) + "</span> Mbps";
+    } catch (error) {
+        console.error(error);
+        resultDiv.innerHTML = "<span style='color: #e74c3c;'>Error testing speed.<br>Please try again.</span>";
+    } finally {
         btn.disabled = false;
     }
-}
-
-function showResults(startTime, endTime, duration) {
-    const durationSec = (endTime - startTime) / 1000;
-    const bitsLoaded = duration * 8;
-    const speedBps = bitsLoaded / durationSec;
-    const speedKbps = speedBps / 1024;
-    const speedMbps = speedKbps / 1024;
-
-    document.getElementById('result').innerText = "Download Speed: " + speedMbps.toFixed(2) + " Mbps";
 }
 </script>
 
