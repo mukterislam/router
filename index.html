@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>100MB Live Speed Test</title>
+    <title>Ultimate Internet Speed & Ping Test</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
@@ -20,10 +20,10 @@
             border-radius: 24px; 
             box-shadow: 0 15px 35px rgba(0,0,0,0.06); 
             text-align: center; 
-            max-width: 380px; 
+            max-width: 400px; 
             width: 100%;
         }
-        h2 { color: #1a1a1a; margin-bottom: 30px; font-size: 24px; font-weight: 700; }
+        h2 { color: #1a1a1a; margin-bottom: 25px; font-size: 24px; font-weight: 700; }
         button { 
             background: #0066ff; 
             color: white; 
@@ -40,19 +40,49 @@
         button:hover { background: #0052cc; }
         button:disabled { background: #cbd5e1; cursor: not-allowed; }
         
+        /* পিং এবং জিটার গ্রিড লেআউট */
+        .ping-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+        }
+        .ping-box {
+            flex: 1;
+            text-align: center;
+        }
+        .ping-box:first-child {
+            border-right: 1px solid #cbd5e1;
+        }
+        .ping-label {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .ping-value {
+            font-size: 20px;
+            color: #334155;
+            font-weight: 700;
+        }
+
         .speed-display {
-            margin: 20px 0;
-            min-height: 100px;
+            margin: 25px 0;
+            min-height: 90px;
         }
         .status-text {
-            font-size: 16px;
+            font-size: 15px;
             color: #64748b;
             margin-bottom: 5px;
             text-transform: uppercase;
             letter-spacing: 1px;
+            font-weight: 600;
         }
         .speed-number {
-            font-size: 48px; 
+            font-size: 52px; 
             color: #0066ff; 
             font-weight: 800;
             line-height: 1;
@@ -68,9 +98,20 @@
 <body>
 
 <div class="card">
-    <h2>Internet Speed Test</h2>
-    <button id="start-btn" onclick="runSpeedTest()">Start Test</button>
+    <h2>Speed & Ping Test</h2>
+    <button id="start-btn" onclick="startFullTest()">Start Test</button>
     
+    <div class="ping-container">
+        <div class="ping-box">
+            <div class="ping-label">PING</div>
+            <div><span id="ping-val" class="ping-value">-</span> <span style="font-size:12px; color:#64748b;">ms</span></div>
+        </div>
+        <div class="ping-box">
+            <div class="ping-label">JITTER</div>
+            <div><span id="jitter-val" class="ping-value">-</span> <span style="font-size:12px; color:#64748b;">ms</span></div>
+        </div>
+    </div>
+
     <div class="speed-display">
         <div id="status" class="status-text">Ready</div>
         <div>
@@ -81,17 +122,60 @@
 </div>
 
 <script>
-async function runSpeedTest() {
+// পিং টেস্ট করার ফাংশন (অনপরপর ৫ বার রিকোয়েস্ট পাঠিয়ে গড় হিসাব করবে)
+async function measurePing() {
+    const pingUrl = "https://speed.cloudflare.com/cdn-cgi/trace?v=" + new Date().getTime();
+    let pings = [];
+    
+    for (let i = 0; i < 5; i++) {
+        const start = performance.now();
+        try {
+            await fetch(pingUrl, { cache: 'no-store', mode: 'no-cors' });
+            const end = performance.now();
+            pings.push(end - start);
+        } catch (e) {
+            console.error("Ping error");
+        }
+    }
+    
+    if(pings.length === 0) return { avgPing: 0, jitter: 0 };
+
+    // গড় পিং (Average Ping)
+    const avgPing = pings.reduce((a, b) => a + b, 0) / pings.length;
+    
+    // জিটার ক্যালকুলেশন (পরপর পিংগুলোর মধ্যকার পার্থক্য বা ভ্যারিয়েশন)
+    let totalJitter = 0;
+    for (let i = 1; i < pings.length; i++) {
+        totalJitter += Math.abs(pings[i] - pings[i-1]);
+    }
+    const jitter = totalJitter / (pings.length - 1);
+
+    return { avgPing, jitter };
+}
+
+async function startFullTest() {
     const speedEl = document.getElementById('speed');
     const statusEl = document.getElementById('status');
+    const pingEl = document.getElementById('ping-val');
+    const jitterEl = document.getElementById('jitter-val');
     const btn = document.getElementById('start-btn');
     
     btn.disabled = true;
-    statusEl.innerText = "Testing (100MB File)...";
-    speedEl.style.color = "#0066ff";
+    
+    // ১. প্রথমে পিং এবং জিটার টেস্ট হবে
+    statusEl.innerText = "Checking Ping & Jitter...";
+    pingEl.innerText = "-";
+    jitterEl.innerText = "-";
     speedEl.innerText = "0.00";
+    speedEl.style.color = "#0066ff";
+    
+    const pingResults = await measurePing();
+    pingEl.innerText = pingResults.avgPing.toFixed(0);
+    jitterEl.innerText = pingResults.jitter.toFixed(0);
 
-    // ক্লাউডফ্লেয়ারের ১০০ মেগাবাইট (100,000,000 bytes) হাই-স্পিড টেস্ট ফাইল লিংক
+    // ২. এরপর ১০০ এমবি ডাউনলোড স্পিড টেস্ট শুরু হবে
+    statusEl.innerText = "Testing Download (100MB)...";
+    
     const testUrl = "https://speed.cloudflare.com/__down?bytes=100000000&v=" + new Date().getTime(); 
     
     try {
@@ -103,7 +187,6 @@ async function runSpeedTest() {
         const reader = response.body.getReader();
         let loadedBytes = 0;
         
-        // প্রতি ১০০ মিলি-সেকেন্ড পর পর স্পিড ক্যালকুলেট করে লাইভ দেখাবে
         const intervalId = setInterval(() => {
             const currentTime = performance.now();
             const durationSec = (currentTime - startTime) / 1000;
@@ -117,26 +200,22 @@ async function runSpeedTest() {
             }
         }, 100);
 
-        // স্ট্রিম বা চিপসের মাধ্যমে ১০০ মেগাবাইটের ডাটা পার্ট বাই পার্ট রিসিভ করা হচ্ছে
         while(true) {
             const {done, value} = await reader.read();
             if (done) break;
             loadedBytes += value.length;
         }
         
-        // ডাউনলোড কমপ্লিট, লাইভ টাইমার বন্ধ
         clearInterval(intervalId);
         
-        // ফাইনাল এভারেজ স্পিড কাউন্ট
         const endTime = performance.now();
         const finalDuration = (endTime - startTime) / 1000;
         const finalBits = loadedBytes * 8;
         const finalMbps = (finalBits / finalDuration) / (1024 * 1024);
 
-        // ফাইনাল রেজাল্ট শো এবং কালার চেঞ্জ
-        statusEl.innerText = "Download Speed";
+        statusEl.innerText = "Test Completed";
         speedEl.innerText = finalMbps.toFixed(2);
-        speedEl.style.color = "#2ecc71"; // সফল হলে সবুজ দেখাবে
+        speedEl.style.color = "#2ecc71"; // সফল হলে স্পিড সবুজ হয়ে যাবে
 
     } catch (error) {
         console.error(error);
