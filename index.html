@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Internet Speed Test</title>
+    <title>100MB Live Speed Test</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
@@ -53,7 +53,7 @@
         }
         .speed-number {
             font-size: 48px; 
-            color: #002244; 
+            color: #0066ff; 
             font-weight: 800;
             line-height: 1;
         }
@@ -87,11 +87,12 @@ async function runSpeedTest() {
     const btn = document.getElementById('start-btn');
     
     btn.disabled = true;
-    statusEl.innerText = "Testing...";
+    statusEl.innerText = "Testing (100MB File)...";
     speedEl.style.color = "#0066ff";
+    speedEl.innerText = "0.00";
 
-    // একটি বড় সাইজের (~২০ মেগাবাইট) হাই-স্পিড ফাইল লিংক (CORS মুক্ত)
-    const testUrl = "https://speed.cloudflare.com/__down?bytes=20000000&v=" + new Date().getTime(); 
+    // ক্লাউডফ্লেয়ারের ১০০ মেগাবাইট (100,000,000 bytes) হাই-স্পিড টেস্ট ফাইল লিংক
+    const testUrl = "https://speed.cloudflare.com/__down?bytes=100000000&v=" + new Date().getTime(); 
     
     try {
         const startTime = performance.now();
@@ -102,7 +103,7 @@ async function runSpeedTest() {
         const reader = response.body.getReader();
         let loadedBytes = 0;
         
-        // প্রতি ১০০ মিলি-সেকেন্ডে স্ক্রিনের স্পিড লাইভ আপডেট করার টাইমার
+        // প্রতি ১০০ মিলি-সেকেন্ড পর পর স্পিড ক্যালকুলেট করে লাইভ দেখাবে
         const intervalId = setInterval(() => {
             const currentTime = performance.now();
             const durationSec = (currentTime - startTime) / 1000;
@@ -111,31 +112,31 @@ async function runSpeedTest() {
                 const bitsLoaded = loadedBytes * 8;
                 const speedBps = bitsLoaded / durationSec;
                 const speedMbps = speedBps / (1024 * 1024);
-                // লাইভ স্পিড স্ক্রিনে দেখাবে
+                
                 speedEl.innerText = speedMbps.toFixed(2);
             }
         }, 100);
 
-        // ফাইলটি টুকরো টুকরো করে রিড করা শুরু হবে
+        // স্ট্রিম বা চিপসের মাধ্যমে ১০০ মেগাবাইটের ডাটা পার্ট বাই পার্ট রিসিভ করা হচ্ছে
         while(true) {
             const {done, value} = await reader.read();
             if (done) break;
             loadedBytes += value.length;
         }
         
-        // ডাউনলোড শেষ, টাইমার বন্ধ করা হলো
+        // ডাউনলোড কমপ্লিট, লাইভ টাইমার বন্ধ
         clearInterval(intervalId);
         
-        // ফাইনাল স্পিড ক্যালকুলেশন
+        // ফাইনাল এভারেজ স্পিড কাউন্ট
         const endTime = performance.now();
         const finalDuration = (endTime - startTime) / 1000;
         const finalBits = loadedBytes * 8;
         const finalMbps = (finalBits / finalDuration) / (1024 * 1024);
 
-        // ফাইনাল রেজাল্ট শো
+        // ফাইনাল রেজাল্ট শো এবং কালার চেঞ্জ
         statusEl.innerText = "Download Speed";
         speedEl.innerText = finalMbps.toFixed(2);
-        speedEl.style.color = "#2ecc71"; // সবুজ রঙ হয়ে যাবে
+        speedEl.style.color = "#2ecc71"; // সফল হলে সবুজ দেখাবে
 
     } catch (error) {
         console.error(error);
