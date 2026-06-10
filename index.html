@@ -3,126 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Internet Speed & Ping Test</title>
+    <title>Pro Speedtest Dashboard</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: #f0f2f5; 
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); 
             display: flex; 
             justify-content: center; 
             align-items: center; 
             min-height: 100vh; 
+            color: #f8fafc;
         }
-        .card { 
-            background: white; 
-            padding: 40px 30px; 
-            border-radius: 24px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.06); 
-            text-align: center; 
-            max-width: 400px; 
-            width: 100%;
-        }
-        h2 { color: #1a1a1a; margin-bottom: 25px; font-size: 24px; font-weight: 700; }
-        button { 
-            background: #0066ff; 
-            color: white; 
-            border: none; 
-            padding: 14px 30px; 
-            font-size: 18px; 
-            font-weight: 600;
-            border-radius: 14px; 
-            cursor: pointer; 
-            transition: all 0.2s ease;
-            width: 100%;
-            margin-bottom: 25px;
-        }
-        button:hover { background: #0052cc; }
-        button:disabled { background: #cbd5e1; cursor: not-allowed; }
         
-        /* পিং এবং জিটার গ্রিড লেআউট */
-        .ping-container {
+        .container {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 40px 30px; 
+            border-radius: 28px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3); 
+            text-align: center; 
+            max-width: 420px; 
+            width: 90%;
+            transition: all 0.3s ease;
+        }
+
+        h2 { 
+            font-size: 22px; 
+            font-weight: 600; 
+            letter-spacing: 0.5px; 
+            margin-bottom: 30px;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        /* প্রফেশনাল স্পিডোমিটার সার্কেল */
+        .speed-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 4px solid #334155;
+            margin: 0 auto 30px auto;
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            background: #f8fafc;
-            padding: 15px;
-            border-radius: 14px;
-            border: 1px solid #e2e8f0;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .ping-box {
-            flex: 1;
-            text-align: center;
+
+        /* টেস্ট চলাকালীন গ্লোয়িং অ্যানিমেশন */
+        .speed-circle.testing {
+            border-color: #06b6d4;
+            box-shadow: 0 0 25px rgba(6, 182, 212, 0.3);
+            animation: pulse 1.5s infinite alternate;
         }
-        .ping-box:first-child {
-            border-right: 1px solid #cbd5e1;
+
+        .speed-circle.completed {
+            border-color: #10b981;
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.2);
         }
-        .ping-label {
+
+        .status-text {
+            font-size: 12px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .speed-number {
+            font-size: 46px; 
+            color: #ffffff; 
+            font-weight: 800;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .unit {
             font-size: 14px;
             color: #64748b;
             font-weight: 600;
-            margin-bottom: 5px;
+            margin-top: 4px;
+            text-transform: uppercase;
         }
-        .ping-value {
-            font-size: 20px;
-            color: #334155;
+
+        /* পিং ও জিটার গ্রিড */
+        .stats-grid {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.4);
+            padding: 14px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            color: #e2e8f0;
             font-weight: 700;
         }
 
-        .speed-display {
-            margin: 25px 0;
-            min-height: 90px;
-        }
-        .status-text {
-            font-size: 15px;
-            color: #64748b;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
-        .speed-number {
-            font-size: 52px; 
-            color: #0066ff; 
-            font-weight: 800;
-            line-height: 1;
-        }
-        .unit {
-            font-size: 18px;
+        .stat-ms {
+            font-size: 12px;
             color: #64748b;
             font-weight: 500;
-            margin-left: 5px;
+        }
+
+        /* একশন বাটন */
+        button { 
+            background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+            color: white; 
+            border: none; 
+            padding: 16px 30px; 
+            font-size: 16px; 
+            font-weight: 600;
+            border-radius: 16px; 
+            cursor: pointer; 
+            transition: all 0.2s ease;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(0, 102, 255, 0.2);
+            letter-spacing: 0.5px;
+        }
+
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 102, 255, 0.4);
+        }
+
+        button:active { transform: translateY(0); }
+        button:disabled { 
+            background: #334155; 
+            color: #64748b;
+            cursor: not-allowed; 
+            transform: none;
+            box-shadow: none;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 15px rgba(6, 182, 212, 0.2); }
+            100% { box-shadow: 0 0 30px rgba(6, 182, 212, 0.5); }
         }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Speed & Ping Test</h2>
-    <button id="start-btn" onclick="startFullTest()">Start Test</button>
+<div class="container">
+    <h2>Network Speed</h2>
     
-    <div class="ping-container">
-        <div class="ping-box">
-            <div class="ping-label">PING</div>
-            <div><span id="ping-val" class="ping-value">-</span> <span style="font-size:12px; color:#64748b;">ms</span></div>
+    <div id="circle-wrapper" class="speed-circle">
+        <div id="status" class="status-text">Ready</div>
+        <div id="speed" class="speed-number">0.0</div>
+        <div class="unit">Mbps</div>
+    </div>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">PING</div>
+            <div><span id="ping-val" class="stat-value">-</span><span class="stat-ms"> ms</span></div>
         </div>
-        <div class="ping-box">
-            <div class="ping-label">JITTER</div>
-            <div><span id="jitter-val" class="ping-value">-</span> <span style="font-size:12px; color:#64748b;">ms</span></div>
+        <div class="stat-card">
+            <div class="stat-label">JITTER</div>
+            <div><span id="jitter-val" class="stat-value">-</span><span class="stat-ms"> ms</span></div>
         </div>
     </div>
 
-    <div class="speed-display">
-        <div id="status" class="status-text">Ready</div>
-        <div>
-            <span id="speed" class="speed-number">0.00</span>
-            <span id="unit" class="unit">Mbps</span>
-        </div>
-    </div>
+    <button id="start-btn" onclick="startFullTest()">Run Speed Test</button>
 </div>
 
 <script>
-// পিং টেস্ট করার ফাংশন (অনপরপর ৫ বার রিকোয়েস্ট পাঠিয়ে গড় হিসাব করবে)
 async function measurePing() {
     const pingUrl = "https://speed.cloudflare.com/cdn-cgi/trace?v=" + new Date().getTime();
     let pings = [];
@@ -134,16 +199,14 @@ async function measurePing() {
             const end = performance.now();
             pings.push(end - start);
         } catch (e) {
-            console.error("Ping error");
+            console.error(e);
         }
     }
     
     if(pings.length === 0) return { avgPing: 0, jitter: 0 };
 
-    // গড় পিং (Average Ping)
     const avgPing = pings.reduce((a, b) => a + b, 0) / pings.length;
     
-    // জিটার ক্যালকুলেশন (পরপর পিংগুলোর মধ্যকার পার্থক্য বা ভ্যারিয়েশন)
     let totalJitter = 0;
     for (let i = 1; i < pings.length; i++) {
         totalJitter += Math.abs(pings[i] - pings[i-1]);
@@ -159,22 +222,23 @@ async function startFullTest() {
     const pingEl = document.getElementById('ping-val');
     const jitterEl = document.getElementById('jitter-val');
     const btn = document.getElementById('start-btn');
+    const circleWrapper = document.getElementById('circle-wrapper');
     
     btn.disabled = true;
+    circleWrapper.className = "speed-circle testing";
     
-    // ১. প্রথমে পিং এবং জিটার টেস্ট হবে
-    statusEl.innerText = "Checking Ping & Jitter...";
+    statusEl.innerText = "Latency";
     pingEl.innerText = "-";
     jitterEl.innerText = "-";
-    speedEl.innerText = "0.00";
-    speedEl.style.color = "#0066ff";
+    speedEl.innerText = "0.0";
     
+    // ১. পিং টেস্ট
     const pingResults = await measurePing();
     pingEl.innerText = pingResults.avgPing.toFixed(0);
     jitterEl.innerText = pingResults.jitter.toFixed(0);
 
-    // ২. এরপর ১০০ এমবি ডাউনলোড স্পিড টেস্ট শুরু হবে
-    statusEl.innerText = "Testing Download (100MB)...";
+    // ২. ডাউনলোড স্পিড টেস্ট
+    statusEl.innerText = "Testing";
     
     const testUrl = "https://speed.cloudflare.com/__down?bytes=100000000&v=" + new Date().getTime(); 
     
@@ -196,7 +260,7 @@ async function startFullTest() {
                 const speedBps = bitsLoaded / durationSec;
                 const speedMbps = speedBps / (1024 * 1024);
                 
-                speedEl.innerText = speedMbps.toFixed(2);
+                speedEl.innerText = speedMbps.toFixed(1);
             }
         }, 100);
 
@@ -213,15 +277,15 @@ async function startFullTest() {
         const finalBits = loadedBytes * 8;
         const finalMbps = (finalBits / finalDuration) / (1024 * 1024);
 
-        statusEl.innerText = "Test Completed";
-        speedEl.innerText = finalMbps.toFixed(2);
-        speedEl.style.color = "#2ecc71"; // সফল হলে স্পিড সবুজ হয়ে যাবে
+        statusEl.innerText = "Download";
+        speedEl.innerText = finalMbps.toFixed(1);
+        circleWrapper.className = "speed-circle completed";
 
     } catch (error) {
         console.error(error);
         statusEl.innerText = "Error";
-        speedEl.innerText = "0.00";
-        speedEl.style.color = "#e74c3c";
+        speedEl.innerText = "0.0";
+        circleWrapper.className = "speed-circle";
     } finally {
         btn.disabled = false;
     }
